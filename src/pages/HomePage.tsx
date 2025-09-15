@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { PageLayout } from '@/components/layout/PageLayout';
+import { MapComponent } from '@/components/MapComponent';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { useStore, useDisasterZones, DisasterZone } from '@/store/useStore';
 import { toast } from '@/hooks/use-toast';
@@ -62,52 +64,39 @@ export default function HomePage() {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen p-4">
-        <Card className="glass p-6 max-w-md text-center">
-          <AlertTriangle className="w-12 h-12 text-warning mx-auto mb-4" />
-          <h2 className="text-xl font-bold mb-2">Location Access Required</h2>
-          <p className="text-muted-foreground mb-4">{error}</p>
-          <Button onClick={requestLocation} variant="outline">
-            <Navigation className="w-4 h-4 mr-2" />
-            Try Again
-          </Button>
-        </Card>
-      </div>
+      <PageLayout>
+        <div className="flex items-center justify-center min-h-screen p-4">
+          <Card className="glass p-6 max-w-md text-center">
+            <AlertTriangle className="w-12 h-12 text-warning mx-auto mb-4" />
+            <h2 className="text-xl font-bold mb-2">Location Access Required</h2>
+            <p className="text-muted-foreground mb-4">{error}</p>
+            <Button onClick={requestLocation} variant="outline">
+              <Navigation className="w-4 h-4 mr-2" />
+              Try Again
+            </Button>
+          </Card>
+        </div>
+      </PageLayout>
     );
   }
 
   return (
-    <div className="relative min-h-screen w-full bg-gradient-to-b from-background to-background/90">
-      {/* Map Placeholder */}
-      <div 
-        className="h-screen w-full bg-cover bg-center relative"
-        style={{
-          backgroundImage: `url('https://api.maptiler.com/maps/satellite/static/auto/800x600.jpg?key=xanBpghmk4MnYRATZ0Jd')`
-        }}
-      >
-        {/* Dark Overlay */}
-        <div className="absolute inset-0 bg-black/40" />
-        
-        {/* Loading Overlay */}
-        {loading && (
-          <motion.div 
-            className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-          >
-            <Card className="glass p-6 text-center">
-              <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-4" />
-              <p className="text-foreground">Getting your location...</p>
-            </Card>
-          </motion.div>
-        )}
+    <PageLayout>
+      <div className="relative h-screen w-full">
+        {/* Interactive Map */}
+        <MapComponent 
+          userLocation={location}
+          disasterZones={disasterZones}
+          loading={loading}
+          className="h-full w-full"
+        />
 
         {/* Location Status */}
         {location && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="absolute top-4 left-4 z-30"
+            className="absolute top-4 right-4 z-30"
           >
             <Card className="glass border-safe/30 backdrop-blur-md">
               <div className="p-3 flex items-center gap-2">
@@ -129,7 +118,7 @@ export default function HomePage() {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.5 }}
-            className="absolute top-20 left-4 z-30 space-y-2"
+            className="absolute top-4 left-4 z-30 space-y-2 max-w-xs"
           >
             {disasterZones.map((zone, index) => (
               <motion.div
@@ -139,7 +128,7 @@ export default function HomePage() {
                 transition={{ delay: 0.6 + index * 0.1 }}
               >
                 <Card 
-                  className="glass border-emergency/30 bg-emergency/10 backdrop-blur-md cursor-pointer hover:bg-emergency/20 transition-colors"
+                  className="glass border-emergency/30 bg-emergency/10 backdrop-blur-md cursor-pointer glass-hover"
                   onClick={() => setSelectedZone(zone)}
                 >
                   <div className="p-3">
@@ -202,7 +191,7 @@ export default function HomePage() {
               </div>
 
               <div className="flex gap-2 mt-4">
-                <Button className="flex-1">
+                <Button className="flex-1" onClick={() => handleViewOnMap(selectedZone)}>
                   <Navigation className="w-4 h-4 mr-2" />
                   Navigate to Safety
                 </Button>
@@ -215,6 +204,6 @@ export default function HomePage() {
           </DrawerContent>
         </Drawer>
       )}
-    </div>
+    </PageLayout>
   );
 }
