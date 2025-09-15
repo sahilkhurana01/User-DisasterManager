@@ -82,7 +82,7 @@ export default function HomePage() {
 
   return (
     <PageLayout>
-      <div className="relative h-screen w-full">
+      <div className="relative h-[calc(100vh-5rem)] w-full">
         {/* Interactive Map */}
         <MapComponent 
           userLocation={location}

@@ -47,6 +47,17 @@ export interface EmergencyContact {
   icon?: string;
 }
 
+export interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  emergencyContact: string;
+  medicalInfo: string;
+  lastUpdated: string;
+}
+
 interface AppState {
   // Location & Map
   userLocation: UserLocation | null;
@@ -62,6 +73,9 @@ interface AppState {
   notifications: Notification[];
   unreadCount: number;
   
+  // User Profile
+  userProfile: UserProfile | null;
+  
   // Actions
   setUserLocation: (location: UserLocation | null) => void;
   setLocationPermission: (granted: boolean) => void;
@@ -70,6 +84,10 @@ interface AppState {
   addNotification: (notification: Omit<Notification, 'id'>) => void;
   markNotificationRead: (id: string) => void;
   setOfflineStatus: (offline: boolean) => void;
+  
+  // User Profile Actions
+  setUserProfile: (profile: UserProfile | null) => void;
+  updateUserProfile: (profile: Partial<UserProfile>) => void;
 }
 
 export const useStore = create<AppState>()(
@@ -112,6 +130,7 @@ export const useStore = create<AppState>()(
     ],
     notifications: [],
     unreadCount: 0,
+    userProfile: null,
 
     // Actions
     setUserLocation: (location) => set({ userLocation: location }),
@@ -140,7 +159,14 @@ export const useStore = create<AppState>()(
       unreadCount: Math.max(0, state.unreadCount - 1)
     })),
     
-    setOfflineStatus: (offline) => set({ isOffline: offline })
+    setOfflineStatus: (offline) => set({ isOffline: offline }),
+    
+    // User Profile Actions
+    setUserProfile: (profile) => set({ userProfile: profile }),
+    
+    updateUserProfile: (profile) => set((state) => ({
+      userProfile: state.userProfile ? { ...state.userProfile, ...profile } : null
+    }))
   }))
 );
 
@@ -153,3 +179,4 @@ export const useNotifications = () => useStore((state) => state.notifications);
 export const useUnreadCount = () => useStore((state) => state.unreadCount);
 export const useEmergencyContacts = () => useStore((state) => state.emergencyContacts);
 export const useOfflineStatus = () => useStore((state) => state.isOffline);
+export const useUserProfile = () => useStore((state) => state.userProfile);

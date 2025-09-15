@@ -11,6 +11,7 @@ import SOSPage from "./pages/SOSPage";
 import ContactsPage from "./pages/ContactsPage";
 import AIAssistantPage from "./pages/AIAssistantPage";
 import NotificationsPage from "./pages/NotificationsPage";
+import SettingsPage from "./pages/SettingsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ const App = () => (
           <Route path="/contacts" element={<ContactsPage />} />
           <Route path="/ai" element={<AIAssistantPage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

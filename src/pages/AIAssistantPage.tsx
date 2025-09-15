@@ -113,12 +113,12 @@ export default function AIAssistantPage() {
 
   return (
     <PageLayout>
-      <div className="flex flex-col h-screen">
+      <div className="flex flex-col h-[calc(100vh-11rem)]">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-4 text-center border-b border-white/10"
+          className="p-4 text-center border-b border-white/10 flex-shrink-0"
         >
           <div className="flex items-center justify-center gap-2 mb-2">
             <Bot className="w-8 h-8 text-accent" />
@@ -130,7 +130,7 @@ export default function AIAssistantPage() {
         </motion.div>
 
         {/* Messages */}
-        <div className="flex-1 p-4 space-y-4 overflow-y-auto pb-32">
+        <div className="flex-1 p-4 space-y-4 overflow-y-auto pb-4">
           {messages.map((message, index) => (
             <motion.div
               key={message.id}
@@ -191,7 +191,7 @@ export default function AIAssistantPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="px-4 pb-2"
+          className="px-4 pb-2 flex-shrink-0"
         >
           <div className="flex gap-2 overflow-x-auto pb-2">
             {quickPrompts.map((prompt, index) => (
@@ -213,7 +213,7 @@ export default function AIAssistantPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="p-4 border-t border-white/10 bg-background/50 backdrop-blur-sm"
+          className="p-4 border-t border-white/10 bg-background/50 backdrop-blur-sm flex-shrink-0"
         >
           <div className="flex gap-2">
             <div className="flex-1 relative">

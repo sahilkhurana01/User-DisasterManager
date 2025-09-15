@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { motion } from 'framer-motion';
 import { BottomNavigation } from './BottomNavigation';
+import { TopBar } from './TopBar';
 
 interface PageLayoutProps {
   children: ReactNode;
@@ -31,13 +32,15 @@ const pageTransition = {
 export function PageLayout({ children, className = '' }: PageLayoutProps) {
   return (
     <div className="relative min-h-screen bg-background">
+      <TopBar />
+      
       <motion.main
         initial="initial"
         animate="in"
         exit="out"
         variants={pageVariants}
         transition={pageTransition}
-        className={`pb-24 ${className}`}
+        className={`pt-20 pb-28 ${className}`}
       >
         {children}
       </motion.main>

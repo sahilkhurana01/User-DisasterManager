@@ -100,27 +100,21 @@
     @apply bg-glass-hover;
   }
   
-  /* Emergency Button Pulse Animation */
+  /* Emergency Button Gentle Pulse Animation */
   .pulse-emergency {
-    @apply animate-pulse;
-    box-shadow: 0 0 0 0 hsl(var(--emergency) / 0.4);
-    animation: pulse-emergency 2s infinite;
+    animation: gentle-pulse 3s ease-in-out infinite;
+    box-shadow: 0 0 0 0 hsl(var(--emergency) / 0.3);
   }
   
-  @keyframes pulse-emergency {
-    0% {
-      transform: scale(0.95);
-      box-shadow: 0 0 0 0 hsl(var(--emergency) / 0.7);
-    }
-    
-    70% {
+  @keyframes gentle-pulse {
+    0%, 100% {
       transform: scale(1);
-      box-shadow: 0 0 0 10px hsl(var(--emergency) / 0);
+      box-shadow: 0 0 0 0 hsl(var(--emergency) / 0.3);
     }
     
-    100% {
-      transform: scale(0.95);
-      box-shadow: 0 0 0 0 hsl(var(--emergency) / 0);
+    50% {
+      transform: scale(1.02);
+      box-shadow: 0 0 0 4px hsl(var(--emergency) / 0.1);
     }
   }
   
@@ -151,8 +145,19 @@
   
   /* Navigation Styles */
   .nav-glass {
-    @apply glass border-t border-white/20;
-    backdrop-filter: blur(20px);
+    @apply bg-background/95 border-t border-white/20;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Top Bar Styles */
+  .top-bar-height {
+    height: 4rem; /* 64px */
+  }
+  
+  /* Ensure content starts below top bar */
+  .content-below-topbar {
+    margin-top: 4rem; /* 64px */
   }
   
   /* Scroll Styles */

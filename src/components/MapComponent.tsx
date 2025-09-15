@@ -1,9 +1,10 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import { motion } from 'framer-motion';
 import { MapPin, AlertTriangle } from 'lucide-react';
 import { Card } from '@/components/ui/card';
-import { DisasterZone } from '@/store/useStore';
+import { DisasterZone, useStore } from '@/store/useStore';
+import { fetchNearbySafePlaces, SafePlace, buildGoogleDirectionsUrl } from '@/services/placesService';
 
 // MapTiler API key
 const MAPTILER_API_KEY = 'xanBpghmk4MnYRATZ0Jd';
@@ -25,6 +26,24 @@ export function MapComponent({
   const mapInstanceRef = useRef<L.Map | null>(null);
   const userMarkerRef = useRef<L.Marker | null>(null);
   const disasterLayersRef = useRef<L.Layer[]>([]);
+  const safePlaceMarkersRef = useRef<L.Layer[]>([]);
+  const [cityName, setCityName] = useState<string>('');
+
+  const setSafeZones = useStore((s) => s.setSafeZones);
+
+  // Function to get city name from coordinates
+  const getCityName = async (lat: number, lng: number) => {
+    try {
+      const response = await fetch(
+        `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`
+      );
+      const data = await response.json();
+      return data.city || data.locality || data.principalSubdivision || 'Unknown Location';
+    } catch (error) {
+      console.error('Error fetching city name:', error);
+      return 'Unknown Location';
+    }
+  };
 
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
@@ -56,7 +75,7 @@ export function MapComponent({
     };
   }, []);
 
-  // Update user location marker
+  // Update user location marker and fetch places
   useEffect(() => {
     if (!mapInstanceRef.current || !userLocation) return;
 
@@ -65,17 +84,22 @@ export function MapComponent({
       mapInstanceRef.current.removeLayer(userMarkerRef.current);
     }
 
-    // Create custom user location icon
+    // Fetch city name
+    getCityName(userLocation.lat, userLocation.lng).then(setCityName);
+
+    // Create custom blue pin icon for user location
     const userIcon = L.divIcon({
       html: `
         <div class="relative">
-          <div class="w-6 h-6 bg-safe rounded-full border-2 border-white shadow-lg animate-pulse-safe"></div>
-          <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full"></div>
+          <div class="w-8 h-8 bg-blue-500 rounded-full border-2 border-white shadow-lg flex items-center justify-center">
+            <div class="w-4 h-4 bg-white rounded-full"></div>
+          </div>
+          <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-blue-500"></div>
         </div>
       `,
       className: 'user-location-marker',
-      iconSize: [24, 24],
-      iconAnchor: [12, 12],
+      iconSize: [32, 40],
+      iconAnchor: [16, 40],
     });
 
     // Add user marker
@@ -86,8 +110,8 @@ export function MapComponent({
       .bindPopup(`
         <div class="glass p-3 border border-white/20 rounded-lg">
           <div class="flex items-center gap-2 mb-2">
-            <div class="w-3 h-3 bg-safe rounded-full"></div>
-            <span class="font-medium text-safe">Your Location</span>
+            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+            <span class="font-medium text-blue-500">My Location</span>
           </div>
           <div class="text-sm text-muted-foreground">
             ${userLocation.lat.toFixed(6)}, ${userLocation.lng.toFixed(6)}
@@ -100,7 +124,62 @@ export function MapComponent({
 
     // Center map on user location
     mapInstanceRef.current.setView([userLocation.lat, userLocation.lng], 15);
-  }, [userLocation]);
+
+    // Fetch nearby safe places and display
+    (async () => {
+      try {
+        // Clear previous safe place markers
+        safePlaceMarkersRef.current.forEach(layer => mapInstanceRef.current?.removeLayer(layer));
+        safePlaceMarkersRef.current = [];
+
+        const places: SafePlace[] = await fetchNearbySafePlaces(userLocation.lat, userLocation.lng, 5000);
+
+        // Update store with simplified safe zones
+        setSafeZones(
+          places.map(p => ({
+            id: p.id,
+            name: p.name,
+            type: p.type,
+            coordinates: [p.lat, p.lng] as [number, number],
+            capacity: 0,
+            available: true,
+            tags: [],
+            contact: ''
+          }))
+        );
+
+        const iconForType = (type: string) => {
+          const color = type.includes('hospital') ? '#22c55e' : type.includes('police') ? '#3b82f6' : type.includes('fire') ? '#ef4444' : '#14b8a6';
+          return L.divIcon({
+            html: `
+              <div class="relative">
+                <div class="w-6 h-6" style="background:${color}; border:2px solid white; border-radius:9999px; box-shadow:0 2px 6px rgba(0,0,0,.4)"></div>
+                <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-3 border-r-3 border-t-4" style="border-left-color:transparent;border-right-color:transparent;border-top-color:${color}"></div>
+              </div>
+            `,
+            className: 'safe-place-marker',
+            iconSize: [24, 32],
+            iconAnchor: [12, 32]
+          });
+        };
+
+        places.forEach((p) => {
+          const m = L.marker([p.lat, p.lng], { icon: iconForType(p.type) })
+            .bindPopup(`
+              <div class="glass p-3 border border-white/20 rounded-lg">
+                <div class="font-medium">${p.name}</div>
+                <div class="text-xs text-muted-foreground mb-2">${p.address}</div>
+                <a href="${buildGoogleDirectionsUrl(userLocation.lat, userLocation.lng, p.lat, p.lng)}" target="_blank" class="text-blue-400 underline">Directions</a>
+              </div>
+            `)
+            .addTo(mapInstanceRef.current!);
+          safePlaceMarkersRef.current.push(m);
+        });
+      } catch (e) {
+        console.warn('Failed to load nearby places', e);
+      }
+    })();
+  }, [userLocation, setSafeZones]);
 
   // Update disaster zones
   useEffect(() => {
@@ -141,18 +220,15 @@ export function MapComponent({
             <div class="glass p-4 border border-emergency/30 rounded-lg max-w-xs">
               <div class="flex items-center gap-2 mb-2">
                 <div class="w-3 h-3 bg-emergency rounded-full animate-pulse"></div>
-                <span class="font-medium text-emergency">${zone.title}</span>
+                <span class="font-medium text-emergency">${(zone as any).title || 'Alert Zone'}</span>
               </div>
-              <div class="text-sm text-foreground mb-2">${zone.description}</div>
               <div class="text-xs text-muted-foreground">
                 Severity: <span class="text-emergency font-medium">${zone.severity.toUpperCase()}</span>
               </div>
-              <div class="text-xs text-muted-foreground">
-                Type: ${zone.type}
-              </div>
+              <div class="text-xs text-muted-foreground">Type: ${zone.type}</div>
             </div>
           `)
-          .addTo(mapInstanceRef.current);
+          .addTo(mapInstanceRef.current!);
 
         disasterLayersRef.current.push(marker);
 
@@ -164,7 +240,7 @@ export function MapComponent({
           radius: 500,
           weight: 2,
           opacity: 0.6,
-        }).addTo(mapInstanceRef.current);
+        }).addTo(mapInstanceRef.current!);
 
         disasterLayersRef.current.push(circle);
       }
@@ -198,8 +274,8 @@ export function MapComponent({
         <Card className="glass border-white/20 backdrop-blur-md">
           <div className="p-3 space-y-2">
             <div className="flex items-center gap-2 text-sm">
-              <div className="w-3 h-3 bg-safe rounded-full"></div>
-              <span className="text-safe">Your Location</span>
+              <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+              <span className="text-blue-500">My Location</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <AlertTriangle className="w-3 h-3 text-emergency" />
@@ -208,6 +284,24 @@ export function MapComponent({
           </div>
         </Card>
       </motion.div>
+
+      {/* City Name Overlay */}
+      {cityName && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="absolute top-4 left-4 z-30"
+        >
+          <Card className="glass border-white/20 backdrop-blur-md">
+            <div className="p-3">
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-blue-500" />
+                <span className="font-medium text-blue-500">{cityName}</span>
+              </div>
+            </div>
+          </Card>
+        </motion.div>
+      )}
     </div>
   );
 }
