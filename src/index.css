@@ -79,9 +79,7 @@
     @apply border-border;
   }
   
-  html {
-    @apply dark;
-  }
+  /* Dark mode is applied via 'dark' class on <html> (tailwind.config.ts darkMode='class') */
 
   body {
     @apply bg-background text-foreground;
