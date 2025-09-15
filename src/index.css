@@ -94,7 +94,10 @@
   }
   
   .glass-hover {
-    @apply hover:bg-white/8 transition-colors duration-200;
+    @apply transition-colors duration-200;
+  }
+  .glass-hover:hover {
+    @apply bg-glass-hover;
   }
   
   /* Emergency Button Pulse Animation */
