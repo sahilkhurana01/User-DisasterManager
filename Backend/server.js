@@ -133,6 +133,7 @@ app.post("/api/users", async (req, res) => {
                 "City": city,
                 "Area": locality,
                 "Full Address": fullAddress,
+                "Alerts": "green", // Default to green
                 "Timestamp": timestamp || new Date().toISOString(),
             });
             res.json({ message: "User created", phone, created: true });
@@ -140,6 +141,72 @@ app.post("/api/users", async (req, res) => {
     } catch (error) {
         console.error("Error saving user:", error.message);
         res.status(500).json({ error: "Failed to save user data" });
+    }
+});
+
+// Get user alerts status
+app.get("/api/users/:phone/alerts", async (req, res) => {
+    try {
+        const { phone } = req.params;
+        
+        if (!phone) {
+            return res.status(400).json({ error: "Phone number is required" });
+        }
+
+        const sheet = await getUsersInfoSheet();
+        const rows = await sheet.getRows();
+        const user = rows.find((row) => row["Phone No."] === phone);
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        const alertStatus = user["Alerts"] || "green";
+        res.json({ 
+            phone, 
+            alertStatus,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error("Error fetching user alerts:", error.message);
+        res.status(500).json({ error: "Failed to fetch alert status" });
+    }
+});
+
+// Update user alerts status (for testing)
+app.put("/api/users/:phone/alerts", async (req, res) => {
+    try {
+        const { phone } = req.params;
+        const { alertStatus } = req.body;
+        
+        if (!phone) {
+            return res.status(400).json({ error: "Phone number is required" });
+        }
+
+        if (!alertStatus || !["green", "red"].includes(alertStatus)) {
+            return res.status(400).json({ error: "Alert status must be 'green' or 'red'" });
+        }
+
+        const sheet = await getUsersInfoSheet();
+        const rows = await sheet.getRows();
+        const user = rows.find((row) => row["Phone No."] === phone);
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        user["Alerts"] = alertStatus;
+        await user.save();
+
+        res.json({ 
+            message: "Alert status updated", 
+            phone, 
+            alertStatus,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error("Error updating user alerts:", error.message);
+        res.status(500).json({ error: "Failed to update alert status" });
     }
 });
 
