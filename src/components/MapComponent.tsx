@@ -169,7 +169,7 @@ export function MapComponent({
               <div class="glass p-3 border border-white/20 rounded-lg">
                 <div class="font-medium">${p.name}</div>
                 <div class="text-xs text-muted-foreground mb-2">${p.address}</div>
-                <a href="${buildGoogleDirectionsUrl(userLocation.lat, userLocation.lng, p.lat, p.lng)}" target="_blank" class="text-blue-400 underline">Directions</a>
+                <a href="${buildGoogleDirectionsUrl(userLocation.lat, userLocation.lng, p.lat, p.lng)}" target="_blank" class="text-green-400 underline">Directions</a>
               </div>
             `)
             .addTo(mapInstanceRef.current!);
@@ -274,8 +274,8 @@ export function MapComponent({
         <Card className="glass border-white/20 backdrop-blur-md">
           <div className="p-3 space-y-2">
             <div className="flex items-center gap-2 text-sm">
-              <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-              <span className="text-blue-500">My Location</span>
+              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+              <span className="text-green-500">My Location</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <AlertTriangle className="w-3 h-3 text-emergency" />
@@ -295,8 +295,8 @@ export function MapComponent({
           <Card className="glass border-white/20 backdrop-blur-md">
             <div className="p-3">
               <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-blue-500" />
-                <span className="font-medium text-blue-500">{cityName}</span>
+                <MapPin className="w-4 h-4 text-green-500" />
+                <span className="font-medium text-green-500">{cityName}</span>
               </div>
             </div>
           </Card>

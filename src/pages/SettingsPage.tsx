@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { toast } from '@/hooks/use-toast';
 import { profileService, UserProfile } from '@/services/profileService';
+import { googleSheetsService } from '@/services/googleSheetsService';
 
 export default function SettingsPage() {
   const [profile, setProfile] = useState<UserProfile>({
@@ -83,8 +84,24 @@ export default function SettingsPage() {
     try {
       setIsSaving(true);
       
+      // Save to local storage and profile service
       const savedProfile = await profileService.saveProfile(profile);
       setProfile(savedProfile);
+      
+      // Also update Google Sheets if phone number exists
+      if (profile.phone) {
+        const success = await googleSheetsService.updateUserData(profile.phone, {
+          phone: profile.phone,
+          email: profile.email,
+          fullAddress: profile.address
+        });
+        
+        if (success) {
+          console.log('Profile updated in Google Sheets');
+        } else {
+          console.warn('Failed to update Google Sheets, but local save succeeded');
+        }
+      }
       
       toast({
         title: "Profile Updated",
