@@ -2,13 +2,19 @@ const express = require("express");
 const cors = require("cors");
 const { GoogleSpreadsheet } = require("google-spreadsheet");
 const path = require("path");
+const fetch = require("node-fetch");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 // CORS configuration
 const corsOptions = {
-    origin: process.env.CORS_ORIGIN || ['http://localhost:8080', 'http://localhost:3000'],
+    origin: process.env.CORS_ORIGIN || [
+        'http://localhost:8080', 
+        'http://localhost:8081', 
+        'http://localhost:3000',
+        'http://localhost:5173' // Vite default port
+    ],
     credentials: true,
     optionsSuccessStatus: 200
 };

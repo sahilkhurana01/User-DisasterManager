@@ -58,11 +58,27 @@ export interface UserProfile {
   lastUpdated: string;
 }
 
+export interface AlertStatus {
+  phone: string;
+  alertStatus: 'green' | 'red';
+  timestamp: string;
+}
+
+export interface DangerZone {
+  id: string;
+  center: [number, number];
+  radius: number;
+  intensity: number; // 0-1 for animation intensity
+  color: string;
+  timestamp: string;
+}
+
 interface AppState {
   // Location & Map
   userLocation: UserLocation | null;
   disasterZones: DisasterZone[];
   safeZones: SafeZone[];
+  dangerZones: DangerZone[];
   
   // UI State
   isLocationPermissionGranted: boolean;
@@ -76,6 +92,10 @@ interface AppState {
   // User Profile
   userProfile: UserProfile | null;
   
+  // Alert Status
+  alertStatus: AlertStatus | null;
+  isDangerActive: boolean;
+  
   // Actions
   setUserLocation: (location: UserLocation | null) => void;
   setLocationPermission: (granted: boolean) => void;
@@ -88,6 +108,13 @@ interface AppState {
   // User Profile Actions
   setUserProfile: (profile: UserProfile | null) => void;
   updateUserProfile: (profile: Partial<UserProfile>) => void;
+  
+  // Alert Actions
+  setAlertStatus: (status: AlertStatus | null) => void;
+  setDangerActive: (active: boolean) => void;
+  addDangerZone: (zone: Omit<DangerZone, 'id'>) => void;
+  removeDangerZone: (id: string) => void;
+  clearDangerZones: () => void;
 }
 
 export const useStore = create<AppState>()(
@@ -96,6 +123,7 @@ export const useStore = create<AppState>()(
     userLocation: null,
     disasterZones: [],
     safeZones: [],
+    dangerZones: [],
     isLocationPermissionGranted: false,
     isOffline: false,
     emergencyContacts: [
@@ -131,6 +159,8 @@ export const useStore = create<AppState>()(
     notifications: [],
     unreadCount: 0,
     userProfile: null,
+    alertStatus: null,
+    isDangerActive: false,
 
     // Actions
     setUserLocation: (location) => set({ userLocation: location }),
@@ -166,7 +196,22 @@ export const useStore = create<AppState>()(
     
     updateUserProfile: (profile) => set((state) => ({
       userProfile: state.userProfile ? { ...state.userProfile, ...profile } : null
-    }))
+    })),
+    
+    // Alert Actions
+    setAlertStatus: (status) => set({ alertStatus: status }),
+    
+    setDangerActive: (active) => set({ isDangerActive: active }),
+    
+    addDangerZone: (zone) => set((state) => ({
+      dangerZones: [...state.dangerZones, { ...zone, id: Date.now().toString() }]
+    })),
+    
+    removeDangerZone: (id) => set((state) => ({
+      dangerZones: state.dangerZones.filter(zone => zone.id !== id)
+    })),
+    
+    clearDangerZones: () => set({ dangerZones: [] })
   }))
 );
 
@@ -175,8 +220,11 @@ export const useLocationPermission = () => useStore((state) => state.isLocationP
 export const useUserLocation = () => useStore((state) => state.userLocation);
 export const useDisasterZones = () => useStore((state) => state.disasterZones);
 export const useSafeZones = () => useStore((state) => state.safeZones);
+export const useDangerZones = () => useStore((state) => state.dangerZones);
 export const useNotifications = () => useStore((state) => state.notifications);
 export const useUnreadCount = () => useStore((state) => state.unreadCount);
 export const useEmergencyContacts = () => useStore((state) => state.emergencyContacts);
 export const useOfflineStatus = () => useStore((state) => state.isOffline);
 export const useUserProfile = () => useStore((state) => state.userProfile);
+export const useAlertStatus = () => useStore((state) => state.alertStatus);
+export const useIsDangerActive = () => useStore((state) => state.isDangerActive);
