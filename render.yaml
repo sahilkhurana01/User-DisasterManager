@@ -1,0 +1,28 @@
+services:
+  # Frontend Service
+  - type: web
+    name: disaster-management-frontend
+    env: static
+    buildCommand: npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+  # Backend Service
+  - type: web
+    name: disaster-management-backend
+    env: node
+    buildCommand: cd Backend && npm install
+    startCommand: cd Backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: GOOGLE_SHEET_ID
+        sync: false  # Set this in Render dashboard
+      - key: GOOGLE_SERVICE_ACCOUNT_EMAIL
+        sync: false  # Set this in Render dashboard
+      - key: GOOGLE_PRIVATE_KEY
+        sync: false  # Set this in Render dashboard

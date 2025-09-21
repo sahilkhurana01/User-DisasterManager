@@ -79,7 +79,9 @@ const App = () => {
             theme="dark"
             toastClassName="glass border-white/20"
           />
-          <OnboardingPage onComplete={handleOnboardingComplete} />
+          <BrowserRouter>
+            <OnboardingPage onComplete={handleOnboardingComplete} />
+          </BrowserRouter>
         </TooltipProvider>
       </QueryClientProvider>
     );

@@ -22,7 +22,7 @@ Backend/disaster-management312-be80c55826f0.json
 !eslint.config.js
 
 # Build outputs
-dist/
+# dist/  # Commented out for deployment - dist should be committed
 dist-ssr
 build/
 *.tsbuildinfo

@@ -6,9 +6,25 @@ const path = require("path");
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// CORS configuration
+const corsOptions = {
+    origin: process.env.CORS_ORIGIN || ['http://localhost:8080', 'http://localhost:3000'],
+    credentials: true,
+    optionsSuccessStatus: 200
+};
+
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.json({ 
+        status: 'OK', 
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV || 'development'
+    });
+});
 
 // Google Sheets configuration
 const SHEET_ID =
@@ -22,6 +38,7 @@ async function initializeSheets() {
     try {
         console.log("Initializing Google Sheets...");
         console.log("Sheet ID:", SHEET_ID);
+        console.log("Environment:", process.env.NODE_ENV || 'development');
 
         doc = new GoogleSpreadsheet(SHEET_ID);
 
@@ -34,8 +51,13 @@ async function initializeSheets() {
             });
         } else {
             console.log("Using JSON credentials file for authentication");
-            const credentials = require("./disaster-management312-be80c55826f0.json");
-            await doc.useServiceAccountAuth(credentials);
+            try {
+                const credentials = require("./disaster-management312-be80c55826f0.json");
+                await doc.useServiceAccountAuth(credentials);
+            } catch (fileError) {
+                console.error("Could not load credentials file:", fileError.message);
+                throw new Error("No Google Sheets credentials found. Please set environment variables or provide credentials file.");
+            }
         }
 
         await doc.loadInfo();
@@ -44,7 +66,13 @@ async function initializeSheets() {
         console.log("Sheet count:", doc.sheetCount);
     } catch (error) {
         console.error("Error initializing Google Sheets:", error.message);
-        console.error("Full error:", error);
+        if (process.env.NODE_ENV === 'development') {
+            console.error("Full error:", error);
+        }
+        // Don't throw error in production to allow server to start
+        if (process.env.NODE_ENV === 'production') {
+            console.log("Server will continue without Google Sheets integration");
+        }
     }
 }
 
