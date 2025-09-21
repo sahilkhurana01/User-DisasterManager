@@ -17,16 +17,24 @@ This project consists of two main parts:
 
 ### Backend Deployment (Web Service)
 
+**Option 1: Deploy Backend Separately (Recommended)**
 1. **Create a new Web Service on Render**
 2. **Repository**: Connect your GitHub repository
-3. **Build Command**: `cd Backend && npm install`
-4. **Start Command**: `cd Backend && npm start`
-5. **Environment Variables**:
+3. **Root Directory**: `Backend` (set this in Render dashboard)
+4. **Build Command**: `npm install`
+5. **Start Command**: `npm start`
+6. **Environment Variables**:
    - `NODE_ENV`: `production`
    - `PORT`: `10000` (or let Render assign)
    - `GOOGLE_SHEET_ID`: Your Google Sheets ID
    - `GOOGLE_SERVICE_ACCOUNT_EMAIL`: Your service account email
    - `GOOGLE_PRIVATE_KEY`: Your service account private key
+
+**Option 2: Use render.yaml (Alternative)**
+1. **Create a new Web Service on Render**
+2. **Repository**: Connect your GitHub repository
+3. **Use the `Backend/render.yaml` configuration file**
+4. **Set Environment Variables** in Render dashboard
 
 ## Local Development
 

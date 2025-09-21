@@ -38,8 +38,9 @@
 3. Connect your GitHub repository
 4. Configure:
    - **Name**: `disaster-management-backend`
-   - **Build Command**: `cd Backend && npm install`
-   - **Start Command**: `cd Backend && npm start`
+   - **Root Directory**: `Backend` (IMPORTANT: Set this in Render dashboard)
+   - **Build Command**: `npm install`
+   - **Start Command**: `npm start`
    - **Node Version**: 18 (or latest)
 5. Set Environment Variables:
    - `NODE_ENV`: `production`
