@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=development
+      - PORT=3001
+      - CORS_ORIGIN=http://localhost:8081,http://localhost:8080
+    volumes:
+      - ./Backend:/app
+      - /app/node_modules
+    command: npm run dev:simple
+
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    ports:
+      - "8081:8081"
+    environment:
+      - VITE_API_BASE_URL=http://localhost:3001
+    volumes:
+      - ./Frontend:/app
+      - /app/node_modules
+    command: npm run dev
+    depends_on:
+      - backend

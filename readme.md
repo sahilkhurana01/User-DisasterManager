@@ -1,73 +1,234 @@
-# Welcome to your Lovable project
+# 🚨 Disaster Management PWA
 
-## Project info
+A comprehensive Progressive Web Application for disaster management with real-time alerts, emergency contacts, and location-based services.
 
-**URL**: https://lovable.dev/projects/18038fa9-0848-423b-aa1f-77c52d65c527
+## ✨ Features
 
-## How can I edit this code?
+- 🚨 **SOS Emergency Alerts** - Send emergency alerts with GPS coordinates
+- 📍 **Location Services** - Find nearby safe places and emergency services
+- 📱 **PWA Support** - Install as a native app, works offline
+- 🔔 **Real-time Notifications** - Push notifications for emergency alerts
+- 📞 **Emergency Contacts** - Quick access to emergency services
+- 🗺️ **Interactive Maps** - Visualize disaster zones and safe areas
+- 🤖 **AI Assistant** - Get disaster preparedness advice
+- 📊 **Dashboard** - Monitor alerts and emergency status
 
-There are several ways of editing your application.
+## 🚀 Quick Start
 
-**Use Lovable**
+### Prerequisites
+- Node.js 18+
+- npm or yarn
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/18038fa9-0848-423b-aa1f-77c52d65c527) and start prompting.
+### Installation
 
-Changes made via Lovable will be committed automatically to this repo.
+1. **Clone the repository**
+   ```bash
+   git clone <your-repo-url>
+   cd disaster-management
+   ```
 
-**Use your preferred IDE**
+2. **Install dependencies**
+   ```bash
+   npm run install:all
+   ```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+3. **Start development servers**
+   
+   **Option A: Using startup scripts**
+   ```bash
+   # Windows
+   start-dev.bat
+   
+   # Linux/Mac
+   chmod +x start-dev.sh
+   ./start-dev.sh
+   ```
+   
+   **Option B: Manual start**
+   ```bash
+   # Terminal 1 - Backend
+   cd Backend
+   npm run dev:simple
+   
+   # Terminal 2 - Frontend
+   cd Frontend
+   npm run dev
+   ```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+4. **Access the application**
+   - Frontend: http://localhost:8081
+   - Backend API: http://localhost:3001
 
-Follow these steps:
+## 🏗️ Architecture
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+### Frontend (React + Vite)
+- **Framework**: React 18 with TypeScript
+- **Build Tool**: Vite
+- **UI Library**: Radix UI + Tailwind CSS
+- **State Management**: Zustand
+- **Routing**: React Router
+- **Maps**: Leaflet
+- **PWA**: Service Worker + Web App Manifest
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### Backend (Node.js + Express)
+- **Runtime**: Node.js 18+
+- **Framework**: Express.js
+- **CORS**: Configured for cross-origin requests
+- **Storage**: In-memory (can be extended to database)
+- **API**: RESTful endpoints
 
-# Step 3: Install the necessary dependencies.
-npm i
+## 📁 Project Structure
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```
+disaster-management/
+├── Frontend/                 # React frontend application
+│   ├── src/
+│   │   ├── components/      # Reusable UI components
+│   │   ├── pages/           # Application pages
+│   │   ├── services/        # API services
+│   │   ├── hooks/           # Custom React hooks
+│   │   ├── store/           # State management
+│   │   └── lib/             # Utility functions
+│   ├── public/              # Static assets
+│   └── dist/                # Build output
+├── Backend/                 # Node.js backend server
+│   ├── server.js            # Main server (with Google Sheets)
+│   ├── server-simple.js     # Simplified server (in-memory)
+│   └── package.json
+├── docker-compose.yml       # Docker development setup
+├── render.yaml              # Render.com deployment config
+├── DEPLOYMENT_GUIDE.md      # Detailed deployment instructions
+└── start-dev.*              # Development startup scripts
 ```
 
-**Edit a file directly in GitHub**
+## 🔧 Configuration
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Environment Variables
 
-**Use GitHub Codespaces**
+#### Backend
+```env
+PORT=3001
+NODE_ENV=development
+CORS_ORIGIN=http://localhost:8081,http://localhost:8080
+GOOGLE_MAPS_API_KEY=your-api-key
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+#### Frontend
+```env
+VITE_API_BASE_URL=http://localhost:3001
+```
 
-## What technologies are used for this project?
+## 📱 PWA Features
 
-This project is built with:
+- ✅ **Offline Support** - Works without internet connection
+- ✅ **App Installation** - Install as native app on mobile/desktop
+- ✅ **Push Notifications** - Real-time emergency alerts
+- ✅ **Background Sync** - Sync data when connection restored
+- ✅ **Responsive Design** - Works on all device sizes
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 🚀 Deployment
 
-## How can I deploy this project?
+### Option 1: Render.com (Recommended)
+1. Connect GitHub repository to Render
+2. The `render.yaml` file auto-configures both services
+3. Set environment variables in Render dashboard
+4. Deploy automatically on git push
 
-Simply open [Lovable](https://lovable.dev/projects/18038fa9-0848-423b-aa1f-77c52d65c527) and click on Share -> Publish.
+### Option 2: Docker
+```bash
+docker-compose up
+```
 
-## Can I connect a custom domain to my Lovable project?
+### Option 3: Manual Deployment
+See [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for detailed instructions.
 
-Yes, you can!
+## 🔌 API Endpoints
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/health` | Health check |
+| POST | `/api/users` | Create/update user |
+| GET | `/api/users/:phone/alerts` | Get user alert status |
+| PUT | `/api/users/:phone/alerts` | Update alert status |
+| POST | `/api/sos` | Send SOS alert |
+| GET | `/api/places/nearby` | Get nearby places |
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## 🧪 Testing
+
+```bash
+# Test backend health
+curl http://localhost:3001/health
+
+# Test SOS endpoint
+curl -X POST http://localhost:3001/api/sos \
+  -H "Content-Type: application/json" \
+  -d '{"phone":"1234567890","coordinates":[40.7589,-73.9851]}'
+```
+
+## 🛠️ Development
+
+### Available Scripts
+
+#### Root Level
+- `npm run dev` - Start frontend development server
+- `npm run build` - Build frontend for production
+- `npm run install:all` - Install all dependencies
+
+#### Backend
+- `npm run dev` - Start with nodemon (Google Sheets)
+- `npm run dev:simple` - Start simplified server (in-memory)
+- `npm run start` - Start production server
+- `npm run start:simple` - Start simplified production server
+
+#### Frontend
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+
+## 🔒 Security
+
+- ✅ CORS properly configured
+- ✅ Environment variables for sensitive data
+- ✅ Input validation on all endpoints
+- ✅ HTTPS enforced in production
+- ✅ API key restrictions recommended
+
+## 📊 Performance
+
+- ✅ Code splitting for optimal loading
+- ✅ Service worker caching
+- ✅ Image optimization
+- ✅ Bundle size optimization
+- ✅ Lazy loading components
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## 📄 License
+
+MIT License - see LICENSE file for details
+
+## 🆘 Support
+
+- 📖 Check [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) for deployment help
+- 🐛 Report issues in the GitHub repository
+- 💬 Join our community discussions
+
+## 🎯 Roadmap
+
+- [ ] Database integration (PostgreSQL/MongoDB)
+- [ ] User authentication and authorization
+- [ ] Real-time chat for emergency coordination
+- [ ] Advanced mapping features
+- [ ] Mobile app (React Native)
+- [ ] Multi-language support
+- [ ] Advanced analytics dashboard
+
+---
+
+**Built with ❤️ for emergency preparedness and disaster management**

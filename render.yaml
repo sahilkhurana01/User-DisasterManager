@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: disaster-management-backend
+    env: node
+    plan: free
+    buildCommand: cd Backend && npm install
+    startCommand: cd Backend && npm run start:simple
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: CORS_ORIGIN
+        value: https://disaster-management-frontend.onrender.com
+      - key: GOOGLE_MAPS_API_KEY
+        sync: false
+
+  - type: web
+    name: disaster-management-frontend
+    env: static
+    plan: free
+    buildCommand: cd Frontend && npm install && npm run build
+    staticPublishPath: Frontend/dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://disaster-management-backend.onrender.com

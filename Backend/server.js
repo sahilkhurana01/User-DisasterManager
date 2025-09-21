@@ -2,7 +2,6 @@ const express = require("express");
 const cors = require("cors");
 const { GoogleSpreadsheet } = require("google-spreadsheet");
 const path = require("path");
-const fetch = require("node-fetch");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -340,7 +339,7 @@ app.post("/api/sos", async (req, res) => {
     }
 });
 
-// Google Places API proxy endpoint to avoid CORS issues
+// Google Places API (New) proxy endpoint to avoid CORS issues
 app.get("/api/places/nearby", async (req, res) => {
     try {
         const { lat, lng, type, radius } = req.query;
@@ -354,12 +353,65 @@ app.get("/api/places/nearby", async (req, res) => {
         // Get API key from environment or use the one from the frontend config
         const apiKey = process.env.GOOGLE_MAPS_API_KEY || 'AIzaSyC-RQrNZyJ4_YmnvZNWz8-wf1pnV5jJzXs';
         
-        const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?key=${apiKey}&location=${lat},${lng}&radius=${radius || 5000}&type=${type}`;
+        // Use the new Places API (New) textSearch endpoint
+        // Convert type to a search query format
+        const searchQuery = `${type} near ${lat},${lng}`;
+        const url = `https://places.googleapis.com/v1/places:searchText?key=${apiKey}`;
         
-        const response = await fetch(url);
+        const requestBody = {
+            textQuery: searchQuery,
+            locationBias: {
+                circle: {
+                    center: {
+                        latitude: parseFloat(lat),
+                        longitude: parseFloat(lng)
+                    },
+                    radius: parseFloat(radius || 5000)
+                }
+            },
+            maxResultCount: 20,
+            fieldMask: "places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.regularOpeningHours,places.iconMaskBaseUri"
+        };
+        
+        // Use Node.js built-in fetch (available in Node.js 18+)
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Goog-FieldMask': 'places.id,places.displayName,places.formattedAddress,places.location,places.rating,places.regularOpeningHours,places.iconMaskBaseUri'
+            },
+            body: JSON.stringify(requestBody)
+        });
+        
         const data = await response.json();
         
-        res.json(data);
+        // Transform the new API response to match the legacy format for compatibility
+        if (data.places) {
+            const transformedData = {
+                results: data.places.map(place => ({
+                    place_id: place.id,
+                    name: place.displayName?.text || 'Unknown',
+                    vicinity: place.formattedAddress || '',
+                    formatted_address: place.formattedAddress || '',
+                    geometry: {
+                        location: {
+                            lat: place.location?.latitude || 0,
+                            lng: place.location?.longitude || 0
+                        }
+                    },
+                    rating: place.rating || 0,
+                    opening_hours: place.regularOpeningHours ? {
+                        open_now: place.regularOpeningHours.openNow || false
+                    } : null,
+                    icon: place.iconMaskBaseUri || ''
+                })),
+                status: 'OK'
+            };
+            res.json(transformedData);
+        } else {
+            res.json({ results: [], status: 'ZERO_RESULTS' });
+        }
+        
     } catch (error) {
         console.error("Error fetching places:", error.message);
         res.status(500).json({ error: "Failed to fetch places" });
