@@ -3,7 +3,8 @@ services:
     name: disaster-management-backend
     env: node
     plan: free
-    buildCommand: cd Backend && npm install
+    nodeVersion: 18
+    buildCommand: cd Backend && npm ci
     startCommand: cd Backend && npm run start:simple
     envVars:
       - key: NODE_ENV
@@ -19,7 +20,8 @@ services:
     name: disaster-management-frontend
     env: static
     plan: free
-    buildCommand: cd Frontend && npm install && npm run build
+    nodeVersion: 18
+    buildCommand: cd Frontend && npm ci && npm run build
     staticPublishPath: Frontend/dist
     envVars:
       - key: VITE_API_BASE_URL
